@@ -8,6 +8,8 @@ const app = express()
 app.use(express.urlencoded({encoded: false}));
 app.use(express.json());
 
+const database = 'work_structure_db';
+
 const db = mysql.createConnection(
   {
     host:'localhost',
@@ -19,7 +21,6 @@ const db = mysql.createConnection(
 );
 
 function init() {
-
   const questions = [
     {
       type: 'list',
@@ -35,128 +36,110 @@ function init() {
         '(Role) Add New'
       ]
     }
-    // {
-    //   type: 'input',
-    //   name: 'new_dept',
-    //   messsage: 'What is the name of the new department you would like to add?'
-    // },
-    // {
-    //   type: 'input',
-    //   name: 'new_employee',
-    //   messsage: 'What is the name of the new employee you would like to add?'
-    // },
-    // {
-    //   type: 'input',
-    //   name: 'new_role',
-    //   messsage: 'What is the name of the new role you would like to add?'
-    // },
   ];
 
-
   inquirer.prompt(questions).then((answers) => {
-    switch(answers.index) {
-      case '(Department) View All':
-        console.log('You chose (Department) View All');
-        db.query('SELECT * FROM department', function (err,results){
-          console.log(results);
-        });
-        break;
-      
-  
-      case '(Department) Add New':
-        console.log('You chose (Department) Add New');
-        break;
-  
-  
-      case '(Employee) View All':
-        console.log('You chose (Employee) View All');
-        db.query('SELECT * FROM employee', function (err,results){
+
+    if (answers.index === '(Department) View All') {
+      db.query(`SELECT * FROM department`, function (err,results){
         console.log(results);
-        });
-        break;
-  
-  
-      case '(Employee) Add New':
-        console.log('You chose (Employee) Add New');
-        break;
-  
-  
-      case '(Employee) Update Role':
-        console.log('You chose (Employee) Update Role');
-        break;
-  
-  
-      case '(Role) View All':
-        console.log('You chose (Role) View All');
-        db.query('SELECT * FROM role', function (err,results){
+       init();
+      })
+    };
+    
+    if (answers.index === '(Department) Add New') {
+      inquirer.prompt({
+        type: 'input',
+        name: 'new_dept',
+        message: 'What is the name of the new department you would like to add?'
+      }).then((answers) => {
+        db.query(`INSERT INTO department(name) VALUES ('${answers.new_dept}')`, post, function ( err, results){
           console.log(results);
+          init();
         });
-        break;
-  
-  
-      case '(Role) Add New':
-        console.log('You chose (Role) Add New');
-        break;
-  
-  
-      default:
-        console.group('Invalid Choice')
+      });
+    };
+
+    if (answers.index === '(Employee) View All') {
+      db.query(`SELECT * FROM employee`, function (err,results){
+        console.log(results);
+        init();
+      });
+    };
+
+    if (answers.index === '(Employee) Add New') {
+      inquirer.prompt([
+        {
+          type: 'input',
+          name: 'new_EM_first_name',
+          message: 'What is the first name of the new employee you would like to add?'
+        },
+        {
+          type: 'input',
+          name: 'new_EM_last_name',
+          message: 'What is the last name of the new employee you would like to add?'
+        }
+      ]).then((answers) => {
+        db.query(`INSERT INTO employee(first_name,last_name) VALUES ('${answers.new_EM_first_name}','${answers.new_EM_last_name}')`, function ( err, results){
+          console.log(results);
+          init();
+        });
+      });
     }
-  }).catch((error) => {
+
+    if (answers.index === '(Employee) Update Role') {
+    inquirer.prompt([
+      {
+        type: 'input',
+        name: 'select_employee_id',
+        message: "What is the your employee's id, you would like to update their role?"
+      }, 
+      {
+        type: 'input',
+        name: 'select_role_id',
+        message: "What is the role's id you would like to assign to the employee?"
+      }, 
+      ]).then((answers) => {
+        db.query(`UPDATE employee SET role_id = '${answers.select_role_id}' WHERE id = '${answers.select_employee_id}'`, function ( err, results){
+          console.log(results);
+          init();
+        });
+      });
+    };
+
+    if (answers.index === '(Role) View All') {
+      db.query(`SELECT * FROM role`, function (err,results){
+        console.log(results);
+        init();
+      });
+    }
+
+    if (answers.index === '(Role) Add New') {
+      inquirer.prompt([
+        {
+          type: 'input',
+          name: 'new_role',
+          message: 'What is the name of the new role you would like to add?'
+        },
+        {
+          type: 'input',
+          name: 'new_salary',
+          message: 'What is the salary of the new role you would like to add?'
+        }
+      ]).then((answers) => {
+        db.query(`INSERT INTO role(title, salary) VALUES ('${answers.new_role}','${answers.new_salary}')`, function ( err, results){
+          console.log(results);
+          init();
+        });
+      });
+    }
+  })
+  .catch((error) => {
     console.log('Error Occured', error)
   });
-
-
-
 };
 
 init();
-
-
-
-
-
-// inquirer prompt for terminal to gather data on the usage of the 
-
-
-
-
-
-//  Focusing in just the department table
-// viewing all from department table 
-// db.query('INSERT INTO department(name) VALUES ()', function (err,results){
-//   console.log(results);
-// });
-/////////////////////////////////////
-
-
-// Focuing on employee table 
-// viewing all from employee table
-// Adding new employee
-// db.query('INSERT INTO employee(first_name,last_name) VALUES()()', function (err,results){
-//   console.log(results);
-// });
-// Updating role into database
-// db.query('INSERT INTO employee(first_name,last_name) VALUES()()', function (err,results){
-//   console.log(results);
-// });
-/////////////////////////////////////
-
-// Focusing on the role table 
-// viewing all from role table
-
-// Adding a new role
-// db.query('INSERT INTO role(title, salary) VALUE', function (err,results){
-//   console.log(results);
-// });
-/////////////////////////////////////
-
-
-
-
-
-
-
 
 app.use((req,res) => {
   res.status(404).end()
