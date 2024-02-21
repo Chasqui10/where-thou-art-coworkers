@@ -53,7 +53,7 @@ function init() {
         name: 'new_dept',
         message: 'What is the name of the new department you would like to add?'
       }).then((answers) => {
-        db.query(`INSERT INTO department(name) VALUES ('${answers.new_dept}')`, post, function ( err, results){
+        db.query(`INSERT INTO department(name) VALUES ('${answers.new_dept}')`, function ( err, results){
           console.log(results);
           init();
         });
